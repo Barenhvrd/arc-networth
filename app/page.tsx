@@ -14,32 +14,6 @@ type Snapshot = {
 }
 
 const storageKey = "arc-networth:snapshots"
-const defaultSnapshots: Snapshot[] = [
-  {
-    id: "demo-1",
-    label: "Start",
-    currency: 12400,
-    stash: 28600,
-    total: 41000,
-    createdAt: "2026-06-09T16:30:00.000Z",
-  },
-  {
-    id: "demo-2",
-    label: "Raid 1",
-    currency: 13250,
-    stash: 31500,
-    total: 44750,
-    createdAt: "2026-06-09T17:15:00.000Z",
-  },
-  {
-    id: "demo-3",
-    label: "Now",
-    currency: 11800,
-    stash: 36200,
-    total: 48000,
-    createdAt: "2026-06-09T18:00:00.000Z",
-  },
-]
 
 function formatCredits(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -60,19 +34,19 @@ function parseCredits(value: string) {
 function useSnapshots() {
   const [snapshots, setSnapshots] = React.useState<Snapshot[]>(() => {
     if (typeof window === "undefined") {
-      return defaultSnapshots
+      return []
     }
 
     const stored = window.localStorage.getItem(storageKey)
     if (!stored) {
-      return defaultSnapshots
+      return []
     }
 
     try {
       const parsed = JSON.parse(stored) as Snapshot[]
-      return parsed.length ? parsed : defaultSnapshots
+      return parsed
     } catch {
-      return defaultSnapshots
+      return []
     }
   })
 
@@ -206,9 +180,9 @@ export default function Page() {
   const first = snapshots[0]
   const sessionDelta = latest && first ? latest.total - first.total : 0
   const sessionPercent = first ? (sessionDelta / first.total) * 100 : 0
-  const [currency, setCurrency] = React.useState("12000")
-  const [stash, setStash] = React.useState("36000")
-  const [label, setLabel] = React.useState("Now")
+  const [currency, setCurrency] = React.useState("")
+  const [stash, setStash] = React.useState("")
+  const [label, setLabel] = React.useState("Start")
 
   const currencyValue = parseCredits(currency)
   const stashValue = parseCredits(stash)
@@ -225,7 +199,7 @@ export default function Page() {
     }
 
     setSnapshots((current) => [...current, nextSnapshot])
-    setLabel(`Raid ${snapshots.length}`)
+    setLabel(`Raid ${snapshots.length + 1}`)
   }
 
   function clearSnapshots() {
