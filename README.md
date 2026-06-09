@@ -1,21 +1,41 @@
-# Next.js template
+# Arc Networth
 
-This is a Next.js template with shadcn/ui.
+Lightweight ARC Raiders session networth tracker.
 
-## Adding components
+The MVP is intentionally simple: enter currency, enter stash value, save snapshots, and watch the session curve like a small portfolio chart. No account, no backend, no inventory management.
 
-To add components to your app, run the following command:
+## Features
+
+- Currency + stash value inputs
+- Session P&L and percent change
+- Networth curve across snapshots
+- Per-snapshot delta list
+- Local browser storage
+- JSON import/export
+- Built with Next.js and shadcn/ui
+
+## Development
 
 ```bash
-npx shadcn@latest add button
+npm install
+npm run dev
 ```
 
-This will place the ui components in the `components` directory.
+Open `http://localhost:3000`.
 
-## Using components
+## Checks
 
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button";
+```bash
+npm run lint
+npm run typecheck
+npm run build
 ```
+
+## Roadmap
+
+- Rename snapshots inline
+- Optional notes per snapshot
+- CSV export
+- Shareable read-only session file
+- Community-maintained item value presets
+

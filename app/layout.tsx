@@ -11,6 +11,11 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+export const metadata = {
+  title: "Arc Networth",
+  description: "Lightweight ARC Raiders session networth tracker.",
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
