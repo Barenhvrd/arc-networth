@@ -65,6 +65,7 @@ function getTone(value: number) {
 }
 
 function NetworthChart({ snapshots }: { snapshots: Snapshot[] }) {
+  const hasCurve = snapshots.length > 1
   const totals = snapshots.map((snapshot) => snapshot.total)
   const min = Math.min(...totals)
   const max = Math.max(...totals)
@@ -128,15 +129,29 @@ function NetworthChart({ snapshots }: { snapshots: Snapshot[] }) {
             />
           )
         })}
-        <polygon points={area} fill="url(#networth-area)" />
-        <polyline
-          points={line}
-          fill="none"
-          stroke="var(--chart-1)"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth="4"
-        />
+        {hasCurve ? <polygon points={area} fill="url(#networth-area)" /> : null}
+        {hasCurve ? (
+          <polyline
+            points={line}
+            fill="none"
+            stroke="var(--chart-1)"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="4"
+          />
+        ) : (
+          <line
+            x1={padding}
+            x2={width - padding}
+            y1={height / 2}
+            y2={height / 2}
+            stroke="var(--chart-1)"
+            strokeDasharray="10 12"
+            strokeLinecap="round"
+            strokeOpacity="0.5"
+            strokeWidth="3"
+          />
+        )}
         {points.map((point) => (
           <circle
             key={point.id}
@@ -149,6 +164,14 @@ function NetworthChart({ snapshots }: { snapshots: Snapshot[] }) {
           />
         ))}
       </svg>
+      {!hasCurve ? (
+        <div className="absolute bottom-5 left-5 right-5 rounded-md border bg-background/88 p-3 text-sm text-muted-foreground backdrop-blur">
+          <div className="font-medium text-foreground">Baseline saved</div>
+          <div className="mt-1">
+            Save one more snapshot after a raid to draw the performance curve.
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -451,7 +474,7 @@ export default function Page() {
           <div className="grid gap-4">
             {isLoading ? (
               <div className="flex h-[320px] items-center justify-center rounded-md border bg-card text-sm text-muted-foreground">
-                Loading shared data...
+                Syncing shared ledger...
               </div>
             ) : snapshots.length ? (
               <NetworthChart snapshots={snapshots} />
