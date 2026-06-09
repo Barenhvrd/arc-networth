@@ -2,7 +2,7 @@
 
 Lightweight ARC Raiders session networth tracker.
 
-The MVP is intentionally simple: enter currency, enter stash value, save snapshots, and watch the session curve like a small portfolio chart. No account, no backend, no inventory management.
+The MVP is intentionally simple: enter currency, enter stash value, save snapshots, and watch the session curve like a small portfolio chart. No account, no hosted database, no inventory management.
 
 ## Features
 
@@ -10,7 +10,7 @@ The MVP is intentionally simple: enter currency, enter stash value, save snapsho
 - Session P&L and percent change
 - Networth curve across snapshots
 - Per-snapshot delta list
-- Local browser storage
+- Shared server-side JSON storage
 - JSON import/export
 - Built with Next.js and shadcn/ui
 
@@ -22,6 +22,8 @@ npm run dev
 ```
 
 Open `http://localhost:3000`.
+
+Snapshots are stored in `data/snapshots.json`, so every device connected to the same running app sees the same session data.
 
 ## Checks
 
@@ -38,4 +40,3 @@ npm run build
 - CSV export
 - Shareable read-only session file
 - Community-maintained item value presets
-

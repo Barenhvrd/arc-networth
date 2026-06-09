@@ -13,9 +13,6 @@ type Snapshot = {
   createdAt: string
 }
 
-const storageKey = "arc-networth:snapshots"
-const storageSeedKey = "arc-networth:seed-version"
-const currentSeedVersion = "2026-06-09-initial-networth"
 const initialSnapshots: Snapshot[] = [
   {
     id: "initial-2026-06-09",
@@ -41,40 +38,6 @@ function formatDelta(value: number) {
 function parseCredits(value: string) {
   const parsed = Number(value.replaceAll(",", ""))
   return Number.isFinite(parsed) ? Math.max(0, parsed) : 0
-}
-
-function useSnapshots() {
-  const [snapshots, setSnapshots] = React.useState<Snapshot[]>(() => {
-    if (typeof window === "undefined") {
-      return []
-    }
-
-    const stored = window.localStorage.getItem(storageKey)
-    const storedSeedVersion = window.localStorage.getItem(storageSeedKey)
-    if (!stored) {
-      return initialSnapshots
-    }
-
-    if (storedSeedVersion !== currentSeedVersion) {
-      return initialSnapshots
-    }
-
-    try {
-      const parsed = JSON.parse(stored) as Snapshot[]
-      return parsed
-    } catch {
-      return initialSnapshots
-    }
-  })
-
-  React.useEffect(() => {
-    if (snapshots.length) {
-      window.localStorage.setItem(storageKey, JSON.stringify(snapshots))
-      window.localStorage.setItem(storageSeedKey, currentSeedVersion)
-    }
-  }, [snapshots])
-
-  return [snapshots, setSnapshots] as const
 }
 
 function NetworthChart({ snapshots }: { snapshots: Snapshot[] }) {
@@ -193,7 +156,9 @@ function StatCard({
 }
 
 export default function Page() {
-  const [snapshots, setSnapshots] = useSnapshots()
+  const [snapshots, setSnapshots] = React.useState<Snapshot[]>([])
+  const [isLoading, setIsLoading] = React.useState(true)
+  const [syncStatus, setSyncStatus] = React.useState("Loading shared data")
   const latest = snapshots.at(-1)
   const first = snapshots[0]
   const sessionDelta = latest && first ? latest.total - first.total : 0
@@ -206,7 +171,68 @@ export default function Page() {
   const stashValue = parseCredits(stash)
   const total = currencyValue + stashValue
 
-  function addSnapshot() {
+  const saveSnapshots = React.useCallback(async (nextSnapshots: Snapshot[]) => {
+    setSnapshots(nextSnapshots)
+    setSyncStatus("Saving")
+
+    const response = await fetch("/api/snapshots", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ snapshots: nextSnapshots }),
+    })
+
+    if (!response.ok) {
+      setSyncStatus("Save failed")
+      return
+    }
+
+    setSyncStatus("Shared data saved")
+  }, [])
+
+  React.useEffect(() => {
+    let isActive = true
+
+    async function loadSnapshots() {
+      try {
+        const response = await fetch("/api/snapshots", { cache: "no-store" })
+        const data = (await response.json()) as { snapshots?: Snapshot[] }
+        const nextSnapshots = data.snapshots?.length
+          ? data.snapshots
+          : initialSnapshots
+        const nextLatest = nextSnapshots.at(-1)
+
+        if (!isActive) {
+          return
+        }
+
+        setSnapshots(nextSnapshots)
+        if (nextLatest) {
+          setCurrency(String(nextLatest.currency))
+          setStash(String(nextLatest.stash))
+        }
+        setSyncStatus("Shared data loaded")
+      } catch {
+        if (isActive) {
+          setSnapshots(initialSnapshots)
+          setSyncStatus("Using fallback data")
+        }
+      } finally {
+        if (isActive) {
+          setIsLoading(false)
+        }
+      }
+    }
+
+    loadSnapshots()
+
+    return () => {
+      isActive = false
+    }
+  }, [])
+
+  async function addSnapshot() {
     const nextSnapshot: Snapshot = {
       id: crypto.randomUUID(),
       label: label.trim() || `Snapshot ${snapshots.length + 1}`,
@@ -216,14 +242,12 @@ export default function Page() {
       createdAt: new Date().toISOString(),
     }
 
-    setSnapshots((current) => [...current, nextSnapshot])
+    await saveSnapshots([...snapshots, nextSnapshot])
     setLabel(`Raid ${snapshots.length + 1}`)
   }
 
-  function clearSnapshots() {
-    setSnapshots([])
-    window.localStorage.removeItem(storageKey)
-    window.localStorage.removeItem(storageSeedKey)
+  async function clearSnapshots() {
+    await saveSnapshots([])
   }
 
   function exportSnapshots() {
@@ -244,7 +268,7 @@ export default function Page() {
     reader.onload = () => {
       try {
         const parsed = JSON.parse(String(reader.result)) as Snapshot[]
-        setSnapshots(
+        saveSnapshots(
           parsed
             .filter((snapshot) => Number.isFinite(snapshot.total))
             .map((snapshot) => ({
@@ -272,6 +296,9 @@ export default function Page() {
             </h1>
           </div>
           <div className="flex flex-wrap gap-2">
+            <div className="inline-flex h-10 items-center rounded-md border bg-card px-3 text-xs text-muted-foreground">
+              {isLoading ? "Loading" : syncStatus}
+            </div>
             <Button variant="secondary" onClick={exportSnapshots}>
               Export
             </Button>
