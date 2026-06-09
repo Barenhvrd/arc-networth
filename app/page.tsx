@@ -206,9 +206,9 @@ function StatCard({
 }
 
 export default function Page() {
-  const [snapshots, setSnapshots] = React.useState<Snapshot[]>([])
-  const [isLoading, setIsLoading] = React.useState(true)
-  const [syncStatus, setSyncStatus] = React.useState("Loading shared data")
+  const [snapshots, setSnapshots] = React.useState<Snapshot[]>(initialSnapshots)
+  const [isLoading, setIsLoading] = React.useState(false)
+  const [syncStatus, setSyncStatus] = React.useState("Shared data loaded")
   const latest = snapshots.at(-1)
   const first = snapshots[0]
   const sessionDelta = latest && first ? latest.total - first.total : 0
@@ -253,6 +253,7 @@ export default function Page() {
     let isActive = true
 
     async function loadSnapshots() {
+      setIsLoading(true)
       try {
         const response = await fetch("/api/snapshots", { cache: "no-store" })
         const data = (await response.json()) as { snapshots?: Snapshot[] }
