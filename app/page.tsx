@@ -14,6 +14,8 @@ type Snapshot = {
 }
 
 const storageKey = "arc-networth:snapshots"
+const storageSeedKey = "arc-networth:seed-version"
+const currentSeedVersion = "2026-06-09-initial-networth"
 const initialSnapshots: Snapshot[] = [
   {
     id: "initial-2026-06-09",
@@ -48,7 +50,12 @@ function useSnapshots() {
     }
 
     const stored = window.localStorage.getItem(storageKey)
+    const storedSeedVersion = window.localStorage.getItem(storageSeedKey)
     if (!stored) {
+      return initialSnapshots
+    }
+
+    if (storedSeedVersion !== currentSeedVersion) {
       return initialSnapshots
     }
 
@@ -63,6 +70,7 @@ function useSnapshots() {
   React.useEffect(() => {
     if (snapshots.length) {
       window.localStorage.setItem(storageKey, JSON.stringify(snapshots))
+      window.localStorage.setItem(storageSeedKey, currentSeedVersion)
     }
   }, [snapshots])
 
@@ -190,9 +198,9 @@ export default function Page() {
   const first = snapshots[0]
   const sessionDelta = latest && first ? latest.total - first.total : 0
   const sessionPercent = first ? (sessionDelta / first.total) * 100 : 0
-  const [currency, setCurrency] = React.useState("")
-  const [stash, setStash] = React.useState("")
-  const [label, setLabel] = React.useState("Start")
+  const [currency, setCurrency] = React.useState("1632250")
+  const [stash, setStash] = React.useState("3404961")
+  const [label, setLabel] = React.useState("Current")
 
   const currencyValue = parseCredits(currency)
   const stashValue = parseCredits(stash)
@@ -215,6 +223,7 @@ export default function Page() {
   function clearSnapshots() {
     setSnapshots([])
     window.localStorage.removeItem(storageKey)
+    window.localStorage.removeItem(storageSeedKey)
   }
 
   function exportSnapshots() {
