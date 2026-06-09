@@ -14,6 +14,16 @@ type Snapshot = {
 }
 
 const storageKey = "arc-networth:snapshots"
+const initialSnapshots: Snapshot[] = [
+  {
+    id: "initial-2026-06-09",
+    label: "Initial stash",
+    currency: 1632250,
+    stash: 3404961,
+    total: 5037211,
+    createdAt: "2026-06-09T16:26:53.000Z",
+  },
+]
 
 function formatCredits(value: number) {
   return new Intl.NumberFormat("en-US", {
@@ -39,14 +49,14 @@ function useSnapshots() {
 
     const stored = window.localStorage.getItem(storageKey)
     if (!stored) {
-      return []
+      return initialSnapshots
     }
 
     try {
       const parsed = JSON.parse(stored) as Snapshot[]
       return parsed
     } catch {
-      return []
+      return initialSnapshots
     }
   })
 
