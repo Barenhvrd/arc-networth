@@ -1,0 +1,18 @@
+[
+  {
+    "id": "sample-baseline",
+    "label": "Baseline",
+    "currency": 250000,
+    "stash": 750000,
+    "total": 1000000,
+    "createdAt": "2026-01-01T18:00:00.000Z"
+  },
+  {
+    "id": "sample-after-raid",
+    "label": "After raid",
+    "currency": 310000,
+    "stash": 840000,
+    "total": 1150000,
+    "createdAt": "2026-01-01T19:00:00.000Z"
+  }
+]

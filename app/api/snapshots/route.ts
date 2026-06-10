@@ -17,12 +17,20 @@ const dataFile = path.join(dataDirectory, "snapshots.json")
 
 const initialSnapshots: Snapshot[] = [
   {
-    id: "initial-2026-06-09",
-    label: "Initial stash",
-    currency: 1632250,
-    stash: 3404961,
-    total: 5037211,
-    createdAt: "2026-06-09T16:26:53.000Z",
+    id: "sample-baseline",
+    label: "Baseline",
+    currency: 250000,
+    stash: 750000,
+    total: 1000000,
+    createdAt: "2026-01-01T18:00:00.000Z",
+  },
+  {
+    id: "sample-after-raid",
+    label: "After raid",
+    currency: 310000,
+    stash: 840000,
+    total: 1150000,
+    createdAt: "2026-01-01T19:00:00.000Z",
   },
 ]
 
@@ -31,7 +39,11 @@ function sanitizeSnapshot(snapshot: Snapshot): Snapshot | null {
   const stash = Number(snapshot.stash)
   const total = Number(snapshot.total)
 
-  if (!Number.isFinite(currency) || !Number.isFinite(stash) || !Number.isFinite(total)) {
+  if (
+    !Number.isFinite(currency) ||
+    !Number.isFinite(stash) ||
+    !Number.isFinite(total)
+  ) {
     return null
   }
 

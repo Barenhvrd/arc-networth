@@ -10,6 +10,7 @@
 
 # testing
 /coverage
+/test-results
 
 # next.js
 /.next/
@@ -30,7 +31,11 @@ pnpm-debug.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
 
 # typescript
 *.tsbuildinfo
+
+# local app state
+/data/snapshots.json
 next-env.d.ts
